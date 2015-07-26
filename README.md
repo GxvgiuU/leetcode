@@ -1,1 +1,1 @@
-Records for LeetCode exercises. 
+Records for LeetCode Exercises 

@@ -69,6 +69,7 @@ class Solution:
 
 s = Solution()
 print s.findMedianSortedArrays([1], [2,3])
+print s.findMedianSortedArrays([], [2,3])
 print s.findMedianSortedArrays([100001], [100000])
 print s.findMedianSortedArrays([1, 3, 5], [12, 14, 16])
 print s.findMedianSortedArrays([1, 3, 5, 7, 9, 11], [2, 4, 6])
