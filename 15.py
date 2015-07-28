@@ -2,7 +2,37 @@ class Solution:
     # @param {integer[]} nums
     # @return {integer[][]}
     def threeSum(self, nums):
-        
+        # since sort use O(nlog(n)) < O(n^2), however slower to 280ms; avoid duplicate -> 200ms
+        if len(nums) < 3:
+            return []
+        count = set()
+        triplets = []
+        triplets_set = set()
+        nums.sort()
+        n = len(nums)
+        for i in xrange(n):
+            if nums[i] in count:  # avoid duplicate
+                continue
+            count.add(nums[i])
+            j, k = i + 1, n - 1
+            while j < k:
+                s = nums[i] + nums[j] + nums[k]
+                if not s:
+                    if (nums[i], nums[j], nums[k]) not in triplets_set:
+                        triplets.append((nums[i], nums[j], nums[k]))
+                        triplets_set.add((nums[i], nums[j], nums[k]))
+                    j += 1
+                    while nums[j] == nums[j-1] and j < k:  # avoid duplicate
+                        j += 1
+                    k -= 1
+                    while nums[k] == nums[k+1] and j < k:  # avoid duplicate
+                        k -= 1
+                elif s > 0:
+                    k -= 1
+                else:
+                    j += 1
+        return triplets
+    
         # O(n^2), 260ms
         if len(nums) < 3:
             return []
@@ -24,10 +54,9 @@ class Solution:
                     if ((i == k or j == k) and count[k] > 1) or (i != k and j != k and k in count):    
                         triplet = sorted([i, j, k])
                         if tuple(triplet) not in has:
-                            triplets.append(triplet)
+                            triplets.append(tuple(triplet))
                             has.add(tuple(triplet))
         return triplets
-        
 
 
 s = Solution()
