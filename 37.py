@@ -2,7 +2,131 @@ class Solution:
     # @param {character[][]} board
     # @return {void} Do not return anything, modify board in-place instead.
     def solveSudoku(self, board):
-        # straight forward backtracking, however much slower than the method below, 1112ms
+        # not really straight forward, using a lot of tricks like human thinking, 116ms
+        from collections import defaultdict
+        from copy import deepcopy
+        candidates = set("123456789")
+
+        def valid(board, i, j, g):
+            if g in board[i].values():
+                return False
+            if any(g == b[j] for b in board.values()):
+                return False
+            row, column = int(i/3)*3, int(j/3)*3
+            if any(g == board[r][c] for r in range(row, row+3) for c in range(column, column+3)):
+                return False
+            return True
+
+        def mysplit(board):
+            s = defaultdict(lambda: defaultdict())
+            for i in range(9):
+                for j in range(9):
+                    s[i][j] = board[i][j]
+            return s
+
+        def _possible(board, i, j):  # since this is slower, have not use
+            row = {x for x in board[i].values()}
+            column = {y[j] for y in board.values()}
+            square = {board[i // 3 * 3 + x][j // 3 * 3 + y] for x in range(3) for y in range(3)}
+            return candidates.difference(row, column, square)
+
+        def solve(board):
+            if any("." in b.values() for b in board.values()):
+                p = defaultdict(list)
+                infer = []
+                # init infer (those possible length == 1) and p
+                for i in range(9):
+                    for j in range(9):
+                        if board[i][j] == ".":
+                            for g in candidates:
+                                if valid(board, i, j, g):
+                                    p[(i, j)].append(g)
+#                             p[(i, j)] = _possible(board, i, j)  # this is slower than for statement
+                            guess_len = len(p[(i, j)])
+                            if not guess_len:  # guess wrong, no valid solution
+                                return
+                            elif guess_len == 1:
+                                infer.append([i, j, p[(i, j)].pop()])
+
+                if _solve(board, p, infer, []):
+                    return True
+            return False
+
+        def _priority(p):
+            _min = 9
+            priority = []
+            for i in range(9):
+                for j in range(9):
+                    n = len(p[(i, j)])
+                    if n == 2:
+                        return [i, j]
+                    elif n < _min:
+                        _min = n
+                        priority = [i, j]
+            return priority
+
+        def _check(board, p, infer, i, j, g):
+            for x in range(9):
+                if g in p[(i, x)]:
+                    p[(i, x)].remove(g)
+                    guess_len = len(p[(i, x)])
+                    if guess_len == 1:
+                        infer.append([i, x, p[(i, x)].pop()])
+                if g in p[(x, j)]:
+                    p[(x, j)].remove(g)
+                    guess_len = len(p[(x, j)])
+                    if guess_len == 1:
+                        infer.append([x, j, p[(x, j)].pop()])
+            row, column = int(i / 3) * 3, int(j / 3) * 3
+            for r in range(row, row + 3):
+                for c in range(column, column + 3):
+                    if g in p[(r, c)]:
+                        p[(r, c)].remove(g)
+                        guess_len = len(p[(r, c)])
+                        if guess_len == 1:
+                            infer.append([r, c, p[(r, c)].pop()])
+
+        def _solve(board, p, infer, change):
+            while infer:
+                m = infer.pop()
+                if not valid(board, m[0], m[1], m[2]):
+#                     print "strange"
+                    return False
+                board[m[0]][m[1]] = m[2]
+                change.append((m[0], m[1]))
+                _check(board, p, infer, m[0], m[1], m[2])
+
+            while any("." in b.values() for b in board.values()):
+                x, y = _priority(p)
+#                 x, y = min(p, key=lambda k: len(p[k]))  # should exclude those length < 2
+#                 priority = [len(p[(x, y)]), x, y, p[(x, y)]]
+                for c in p[(x, y)]:
+                    if not valid(board, x, y, c):
+#                         print "strange"
+                        continue
+                    board[x][y] = c
+                    p2 = deepcopy(p)
+                    p2[(x, y)].remove(c)
+                    infer2, change2 = [], [(x, y)]
+                    _check(board, p2, infer2, x, y, c)
+
+                    if _solve(board, p2, infer2, change2):
+                        return True
+                    else:
+                        for i, j in change2:
+                            board[i][j] = "."
+                return False
+
+            return True
+
+        b = mysplit(board)
+        if solve(b):
+            for i in range(9):
+                board[i] = "".join(b[i][j] for j in range(9))
+        return
+
+
+        # script 2: straight forward backtracking, however much slower than the method below, 1112ms
         from collections import defaultdict
         candidates = "123456789"
         def valid2(board, i, j, g):
@@ -45,114 +169,6 @@ class Solution:
             board[i] = "".join(re[i][j] for j in range(9))
         return
 
-
-        # not really straight forward, using a lot of tricks like human thinking, 116ms
-        from collections import defaultdict
-        from copy import deepcopy
-        candidates = "123456789"
-
-        def valid(board, i, j, g):
-            if g in board[i].values():
-                return False
-            if any(g == b[j] for b in board.values()):
-                return False
-            row, column = int(i/3)*3, int(j/3)*3
-            if any(g == board[r][c] for r in range(row, row+3) for c in range(column, column+3)):
-                return False
-            return True
-
-        def mysplit(board):
-            s = defaultdict(lambda: defaultdict())
-            for i in range(9):
-                for j in range(9):
-                    s[i][j] = board[i][j]
-            return s
-
-        def solve(board):
-            if any("." in b.values() for b in board.values()):
-                p = defaultdict(list)
-                infer = []
-                for i in range(9):
-                    for j in range(9):
-                        if board[i][j] == ".":
-                            for g in candidates:
-                                if valid(board, i, j, g):
-                                    p[(i, j)].append(g)
-                            guess_len = len(p[(i, j)])
-                            if not guess_len:  # guess wrong, no valid solution
-                                return
-                            elif guess_len == 1:
-                                infer.append([i, j, p[(i, j)][0]])
-
-                board = _solve(board, p, infer)
-            return board
-
-        def _priority(p):
-            m = 9
-            priority = []
-            for i in range(9):
-                for j in range(9):
-                    n = len(p[(i, j)])
-                    if n == 2:
-                        return [n, i, j, p[(i, j)]]
-                    elif n < m:
-                        m = n
-                        priority = [n, i, j, p[(i, j)]]
-            return priority
-
-        def _check(board, p, infer, i, j, g):
-            p[(i, j)].remove(g)
-            for x in range(9):
-                if g in p[(i, x)]:
-                    p[(i, x)].remove(g)
-                    guess_len = len(p[(i, x)])
-                    if guess_len == 1:
-                        infer.append([i, x, p[(i, x)][0]])
-                if g in p[(x, j)]:
-                    p[(x, j)].remove(g)
-                    guess_len = len(p[(x, j)])
-                    if guess_len == 1:
-                        infer.append([x, j, p[(x, j)][0]])
-            row, column = int(i / 3) * 3, int(j / 3) * 3
-            for r in range(row, row + 3):
-                for c in range(column, column + 3):
-                    if g in p[(r, c)]:
-                        p[(r, c)].remove(g)
-                        guess_len = len(p[(r, c)])
-                        if guess_len == 1:
-                            infer.append([r, c, p[(r, c)][0]])
-
-        def _solve(board, p, infer):
-            while infer:
-                m = infer.pop()
-                if not valid(board, m[0], m[1], m[2]):
-#                     print "strange"
-                    return
-                board[m[0]][m[1]] = m[2]
-                _check(board, p, infer, m[0], m[1], m[2])
-
-            while any("." in b.values() for b in board.values()):
-                priority = _priority(p)
-                for c in priority[3]:
-                    if not valid(board, priority[1], priority[2], c):
-#                         print "strange"
-                        continue
-                    board[priority[1]][priority[2]] = c
-                    board2, p2 = deepcopy(board), deepcopy(p)
-                    infer2 = []
-                    _check(board2, p2, infer2, priority[1], priority[2], c)
-
-                    board2 = _solve(board2, p2, infer2)
-                    if board2:
-                        return board2
-                return
-
-            return board
-
-        re = solve(mysplit(board))
-        for i in range(9):
-            board[i] = "".join(re[i][j] for j in range(9))
-        return
 
 
 def myprint(board):
