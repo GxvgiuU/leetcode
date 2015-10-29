@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 class Solution(object):
     def isNumber(self, s):
@@ -14,6 +15,11 @@ class Solution(object):
             return True
         else:
             return False
+
+        # 网友的叼爆方法。什么叫想象力！什么轮子最好用！
+        try: float(s)
+        except ValueError: return False
+        else: return True
 
 
 s = Solution()
