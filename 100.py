@@ -15,23 +15,20 @@ class Solution(object):
         """
         # slower than recursive? 中序遍历
         if p and q:
-            lp, lq = [p], [q]
-            while lp and lq:
-                tp, tq = lp.pop(), lq.pop()
+            stack = [(p, q)]
+            while stack:
+                tp, tq = stack.pop()
                 if tp and tq:
                     if tp.val == tq.val:
-                        lp.extend([tp.right, tp.left])
-                        lq.extend([tq.right, tq.left])
+                        stack.append((tp.right, tq.right))
+                        stack.append((tp.left, tq.left))
                     else:
                         return False
                 elif not tp and not tq:
                     continue
                 else:
                     return False
-            if lp or lq:
-                return False
-            else:
-                return True
+            return True
         elif not p and not q:
             return True
         else:
@@ -49,10 +46,10 @@ class Solution(object):
             return False
 
 a = TreeNode(1)
-a.left = TreeNode(2)
-a.right = TreeNode(3)
+a.left = TreeNode(None)
+a.right = TreeNode(2)
 b = TreeNode(1)
-b.left = TreeNode(2)
-b.left.right = TreeNode(3)
+b.left = TreeNode(None)
+b.right = TreeNode(2)
 s = Solution()
 print s.isSameTree(a, b)
