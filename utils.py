@@ -3,10 +3,12 @@ from __future__ import unicode_literals, print_function
 
 
 # for ListNode below
-# class ListNode(object):
-#     def __init__(self, x):
-#         self.val = x
-#         self.next = None
+class ListNode(object):
+    def __init__(self, x):
+        self.val = x
+        self.next = None
+
+
 def print_list(head):
     tmp = head
     print(tmp.val)
@@ -15,12 +17,25 @@ def print_list(head):
         tmp = tmp.next
     print()
 
+
+def listToLinkedlist(lst):
+    if not lst:
+        return None
+    node = head = ListNode(lst[0])
+    for v in lst[1:]:
+        node.next = ListNode(v)
+        node = node.next
+    return head
+
+
 # Definition for a binary tree node.
-# class TreeNode(object):
-#     def __init__(self, x):
-#         self.val = x
-#         self.left = None
-#         self.right = None
+class TreeNode(object):
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+
 def print_tree(node):
     ''' level order -> http://articles.leetcode.com/how-to-pretty-print-binary-tree/ '''
     def get_info(node):  # return box_size and height
