@@ -10,11 +10,14 @@ class ListNode(object):
 
 
 def print_list(head):
+    if not head:
+        print()
+        return
     tmp = head
-    print(tmp.val)
+    print(tmp.val, end='')
     while tmp.next:
-        print('->', tmp.val)
         tmp = tmp.next
+        print(' ->', tmp.val, end='')
     print()
 
 
