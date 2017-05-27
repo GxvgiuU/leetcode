@@ -2,7 +2,6 @@
 from __future__ import unicode_literals, print_function
 
 
-# for ListNode below
 class ListNode(object):
     def __init__(self, x):
         self.val = x
@@ -78,3 +77,9 @@ def print_tree(node):
             print('\n{0:^{width}}'.format('', width=max(0, padding / 2)), end='')
         else:
             print('{0:^{width}}'.format('', width=padding), end='')
+
+
+class Point(object):
+    def __init__(self, a=0, b=0):
+        self.x = a
+        self.y = b
