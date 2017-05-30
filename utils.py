@@ -30,6 +30,13 @@ def listToLinkedlist(lst):
     return head
 
 
+def linkTwoLinkedlist(a, b):
+    temp = a
+    while temp.next:
+        temp = temp.next
+    temp.next = b
+
+
 # Definition for a binary tree node.
 class TreeNode(object):
     def __init__(self, x):
